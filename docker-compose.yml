@@ -1,0 +1,34 @@
+services:
+  nlp-rest:
+    build: .
+    container_name: nlp-rest
+    ports:
+      - "8000:8000"
+    env_file: .env
+    command: ["uvicorn", "main_rest:app", "--host", "0.0.0.0", "--port", "8000"]
+    depends_on:
+      - jaeger
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  nlp-grpc:
+    build: .
+    container_name: nlp-grpc
+    ports:
+      - "50051:50051"
+    env_file: .env
+    command: ["python", "main_grpc.py"]
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/jaeger:2
+    container_name: jaeger
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "16686:16686" # Jaeger UI
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true

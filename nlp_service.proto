@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package nlp;
+
+option python_generic_services = false;
+
+service NlpService {
+  rpc Analyze (AnalyzeRequest) returns (AnalyzeResponse);
+  rpc AnalyzeBatch (AnalyzeBatchRequest) returns (AnalyzeBatchResponse);
+}
+
+message AnalyzeRequest {
+  string text = 1;
+  repeated string categories = 2;
+  repeated string tonalities = 3;
+}
+
+message AnalyzeResponse {
+  string language = 1;
+  string sentiment = 2;
+  float sentiment_score = 3;
+  repeated CategoryScore matched_categories = 4;
+  float processing_time_ms = 5;
+  repeated TonalityScore matched_tonalities = 6;
+  bool is_toxic = 7;
+  float highest_toxicity_score = 8;
+}
+
+message AnalyzeBatchRequest {
+  repeated string texts = 1;
+  repeated string categories = 2;
+  repeated string tonalities = 3;
+}
+
+message AnalyzeBatchResponse {
+  repeated AnalyzeResponse results = 1;
+}
+
+message CategoryScore {
+  string category = 1;
+  float score = 2;
+}
+
+message TonalityScore {
+  string tonality = 1;
+  float score = 2;
+}
